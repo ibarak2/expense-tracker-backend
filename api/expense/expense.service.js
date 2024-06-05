@@ -12,9 +12,9 @@ export const expenseService = {
 
 const collectionName = "expense"
 
-async function query(filterBy = {}) {
+async function query(filterBy = {}, loggedinUser) {
     try {
-        const criteria = _buildCriteria(filterBy)
+        const criteria = _buildCriteria(filterBy, loggedinUser)
         const collection = await dbService.getCollection(collectionName)
         const expenseCursor = await collection.find(criteria)
         const expenses = expenseCursor.toArray()
@@ -42,6 +42,7 @@ async function remove(expenseId) {
 async function add(expenseToSave, loggedinUser) {
     try {
         expenseToSave.owner = loggedinUser
+        expenseToSave.createdAt = Date.now()
         const collection = await dbService.getCollection(collectionName)
         await collection.insertOne(expenseToSave)
         return expenseToSave
@@ -55,6 +56,8 @@ async function update(expense) {
     try {
         // Peek only updateable fields
         const expenseToSave = {
+            title: expense.title,
+            price: expense.price,
             category: expense.category,
         }
         const collection = await dbService.getCollection(collectionName)
@@ -73,15 +76,29 @@ async function update(expense) {
 }
 
 // local functions
-function _buildCriteria(filterBy) {
+function _buildCriteria(filterBy, loggedinUser) {
     const criteria = {}
 
-    if (filterBy.txt) {
-        criteria.vendor = { $regex: filterBy.txt, $options: "i" }
+    criteria.owner = { $eq: loggedinUser }
+
+    if (filterBy.title) {
+        criteria.title = { $regex: filterBy.title, $options: "i" }
+    }
+
+    if (filterBy.minPrice) {
+        criteria.price = { $gt: filterBy.minPrice }
     }
 
     if (filterBy.category) {
-        criteria.speed = { $gt: filterBy.category }
+        criteria.category = { $regex: filterBy.category, $options: "i" }
+    }
+
+    if (filterBy.fromDate || filterBy.toDate) {
+        logger.debug("expense.service: filterBy", filterBy)
+        const fromDate =
+            filterBy.fromDate === "" ? {} : { $gte: filterBy.fromDate }
+        const toDate = filterBy.toDate === "" ? {} : { $lte: filterBy.toDate }
+        criteria.createdAt = { ...fromDate, ...toDate }
     }
 
     return criteria

@@ -4,12 +4,15 @@ import { logger } from "../../services/logger.service.js"
 export async function getExpenses(req, res) {
     try {
         logger.debug("expense.controller: Getting expenses:", req.query)
+        const { loggedinUser } = req
         const filterBy = {
-            txt: req.query.txt || "",
-            category: +req.query.category || "",
-            createdAt: req.query.createdAt || undefined,
+            title: req.query.title || "",
+            minPrice: +req.query.minPrice || "",
+            category: req.query.category || "",
+            fromDate: new Date(req.query.fromDate).getTime() || "",
+            toDate: new Date(req.query.toDate).getTime() || "",
         }
-        const expenses = await expenseService.query(filterBy)
+        const expenses = await expenseService.query(filterBy, loggedinUser)
         res.json(expenses)
     } catch (err) {
         logger.error("expense.controller: Failed to get expenses", err)
