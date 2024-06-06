@@ -1,6 +1,6 @@
-import { logger } from "../../services/logger.service.js"
-import { dbService } from "../../services/db.service.js"
-import { ObjectId } from "mongodb"
+import { logger } from '../../services/logger.service.js'
+import { dbService } from '../../services/db.service.js'
+import { ObjectId } from 'mongodb'
 
 export const expenseService = {
     query,
@@ -9,18 +9,20 @@ export const expenseService = {
     update,
 }
 
-const collectionName = "expense"
+const collectionName = 'expense'
 
 async function query(filterBy = {}, loggedinUser) {
     try {
         const criteria = _buildCriteria(filterBy, loggedinUser)
         const collection = await dbService.getCollection(collectionName)
-        const expenseCursor = await collection.find(criteria)
+        const expenseCursor = await collection
+            .find(criteria)
+            .sort({ createdAt: -1 })
         const expenses = expenseCursor.toArray()
 
         return expenses
     } catch (err) {
-        logger.error("expense.service: cannot get expenses", err)
+        logger.error('expense.service: cannot get expenses', err)
         throw err
     }
 }
@@ -48,7 +50,7 @@ async function add(expenseToSave, loggedinUser) {
 
         return expenseToSave
     } catch (err) {
-        logger.error("expense.service: can not add expense : " + err)
+        logger.error('expense.service: can not add expense : ' + err)
         throw err
     }
 }
@@ -84,7 +86,7 @@ function _buildCriteria(filterBy, loggedinUser) {
     criteria.owner = { $eq: loggedinUser }
 
     if (filterBy.title) {
-        criteria.title = { $regex: filterBy.title, $options: "i" }
+        criteria.title = { $regex: filterBy.title, $options: 'i' }
     }
 
     if (filterBy.minPrice) {
@@ -92,14 +94,14 @@ function _buildCriteria(filterBy, loggedinUser) {
     }
 
     if (filterBy.category) {
-        criteria.category = { $regex: filterBy.category, $options: "i" }
+        criteria.category = { $regex: filterBy.category, $options: 'i' }
     }
 
     if (filterBy.fromDate || filterBy.toDate) {
-        logger.debug("expense.service: filterBy", filterBy)
+        logger.debug('expense.service: filterBy', filterBy)
         const fromDate =
-            filterBy.fromDate === "" ? {} : { $gte: filterBy.fromDate }
-        const toDate = filterBy.toDate === "" ? {} : { $lte: filterBy.toDate }
+            filterBy.fromDate === '' ? {} : { $gte: filterBy.fromDate }
+        const toDate = filterBy.toDate === '' ? {} : { $lte: filterBy.toDate }
         criteria.createdAt = { ...fromDate, ...toDate }
     }
 
