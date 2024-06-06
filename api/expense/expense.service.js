@@ -1,7 +1,6 @@
 import { logger } from "../../services/logger.service.js"
 import { dbService } from "../../services/db.service.js"
 import { ObjectId } from "mongodb"
-import { asyncLocalStorage } from "../../services/als.service.js"
 
 export const expenseService = {
     query,
@@ -32,6 +31,7 @@ async function remove(expenseId) {
         const { deletedCount } = await collection.deleteOne({
             _id: new ObjectId(expenseId),
         })
+
         return deletedCount
     } catch (err) {
         logger.error(`expense.service: cannot remove expense ${expenseId}`, err)
@@ -45,6 +45,7 @@ async function add(expenseToSave, loggedinUser) {
         expenseToSave.createdAt = Date.now()
         const collection = await dbService.getCollection(collectionName)
         await collection.insertOne(expenseToSave)
+
         return expenseToSave
     } catch (err) {
         logger.error("expense.service: can not add expense : " + err)
@@ -65,6 +66,7 @@ async function update(expense) {
             { _id: new ObjectId(expense._id) },
             { $set: expenseToSave },
         )
+
         return expense
     } catch (err) {
         logger.error(

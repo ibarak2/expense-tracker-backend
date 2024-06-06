@@ -20,6 +20,8 @@ if (process.env.NODE_ENV === "production") {
             "http://localhost:3000",
             "http://127.0.0.1:5173",
             "http://localhost:5173",
+            "http://127.0.0.1:5174",
+            "http://localhost:5174",
         ],
         credentials: true,
     }
@@ -27,7 +29,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 import { authRoutes } from "./api/auth/auth.routes.js"
-import { userRoutes } from "./api/user/user.routes.js"
 import { expenseRoutes } from "./api/expense/expense.routes.js"
 
 // Async Local Storage
@@ -36,10 +37,9 @@ app.all("*", setupAsyncLocalStorage)
 
 // Routes
 app.use("/api/auth", authRoutes)
-app.use("/api/user", userRoutes)
 app.use("/api/expense", expenseRoutes)
 
-//
+// test route
 app.get("/api/test", (req, res) => {
     res.send("Test route is working.")
 })

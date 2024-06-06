@@ -2,8 +2,8 @@ import { expenseService } from "./expense.service.js"
 import { logger } from "../../services/logger.service.js"
 
 export async function getExpenses(req, res) {
+    logger.debug("expense.controller: Getting expenses:", req.query)
     try {
-        logger.debug("expense.controller: Getting expenses:", req.query)
         const { loggedinUser } = req
         const filterBy = {
             title: req.query.title || "",
@@ -22,9 +22,8 @@ export async function getExpenses(req, res) {
 
 export async function addExpense(req, res) {
     logger.debug("expense.controller: Adding expense")
-    const { loggedinUser } = req
-
     try {
+        const { loggedinUser } = req
         const expense = req.body
         const addedExpense = await expenseService.add(expense, loggedinUser)
         res.json(addedExpense)
@@ -36,9 +35,8 @@ export async function addExpense(req, res) {
 
 export async function updateExpense(req, res) {
     logger.debug("expense.controller: Updating expense")
-
-    const { loggedinUser } = req
     try {
+        // const { loggedinUser } = req
         const expense = req.body
         const updatedExpense = await expenseService.update(expense)
         res.json(updatedExpense)
@@ -50,10 +48,9 @@ export async function updateExpense(req, res) {
 
 export async function removeExpense(req, res) {
     logger.debug("expense.controller: Removing expense")
-
-    const { loggedinUser } = req
-    const { expenseId } = req.params
     try {
+        // const { loggedinUser } = req
+        const { expenseId } = req.params
         const deletedCount = await expenseService.remove(expenseId)
         res.json(deletedCount)
     } catch (err) {
